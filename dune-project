@@ -76,3 +76,23 @@
   (melange-edn-core (= :version))
   (melange (>= 5.0.0-52))
   (alcotest (and :with-test (>= 1.5.0)))))
+
+(package
+ (name melange-edn-ppx)
+ (synopsis "Compile-time EDN literals for OCaml and Melange")
+ (description
+  "melange-edn-ppx validates EDN literals at compile time and expands them into backend-independent calls to the public melange-edn-core construction API.")
+ (authors "rcmerci")
+ (maintainers "rcmerci <rcmerci@gmail.com>")
+ (license MIT)
+ (source
+  (github RCmerci/melange-edn))
+ (homepage "https://github.com/RCmerci/melange-edn")
+ (bug_reports "https://github.com/RCmerci/melange-edn/issues")
+ (depends
+  (ocaml  (>= 5.2))
+  (melange-edn-core (= :version))
+  (ppxlib (>= 0.36.0))
+  (js_of_ocaml (and :with-test (>= 5.7.0)))
+  (melange-edn-melange (and :with-test (= :version)))
+  (melange (and :with-test (>= 5.0.0-52)))))

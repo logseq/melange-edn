@@ -27,6 +27,14 @@
  (modules test_signature_native)
  (libraries melange-edn-core melange-edn-native test_support))
 
+(test
+ (name test_ppx_native)
+ (package melange-edn-ppx)
+ (modules test_ppx_native)
+ (libraries melange-edn-core test_support)
+ (preprocess
+  (pps melange-edn-ppx)))
+
 (executable
  (name test_jsoo)
  (modules test_jsoo)
@@ -38,6 +46,14 @@
  (modules test_signature_jsoo)
  (modes js)
  (libraries melange-edn-core melange-edn-jsoo test_support))
+
+(executable
+ (name test_ppx_jsoo)
+ (modules test_ppx_jsoo)
+ (modes js)
+ (libraries melange-edn-core test_support)
+ (preprocess
+  (pps melange-edn-ppx)))
 
 (melange.emit
  (target melange_edn_melange)
@@ -52,6 +68,53 @@
  (modules test_signature_melange)
  (module_systems commonjs)
  (libraries melange-edn-melange test_support))
+
+(melange.emit
+ (target melange_edn_ppx)
+ (package melange-edn-ppx)
+ (modules test_ppx_melange)
+ (module_systems commonjs)
+ (libraries melange-edn-melange test_support)
+ (preprocess
+  (pps melange-edn-ppx)))
+
+(executable
+ (name test_ppx_driver)
+ (modules test_ppx_driver)
+ (libraries melange-edn-ppx ppxlib)
+ (link_flags -linkall))
+
+(rule
+ (alias runtest)
+ (package melange-edn-ppx)
+ (deps
+  test_ppx_compile_failures.sh
+  ppx_failures/empty.ml
+  ppx_failures/malformed.ml
+  ppx_failures/multiple.ml
+  ppx_failures/non_string.ml)
+ (action
+  (run
+   sh
+   %{dep:test_ppx_compile_failures.sh}
+   %{ocamlc}
+   %{exe:test_ppx_driver.exe}
+   %{dep:ppx_failures/empty.ml}
+   %{dep:ppx_failures/malformed.ml}
+   %{dep:ppx_failures/multiple.ml}
+   %{dep:ppx_failures/non_string.ml})))
+
+(rule
+ (alias runtest)
+ (package melange-edn-ppx)
+ (deps
+  test_ppx_jsoo.bc.js
+  (alias melange)
+  melange_edn_ppx/test/test_ppx_melange.js)
+ (action
+  (progn
+   (run node test_ppx_jsoo.bc.js)
+   (run node melange_edn_ppx/test/test_ppx_melange.js))))
 
 (rule
  (alias runtest)

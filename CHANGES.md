@@ -1,3 +1,11 @@
+# Unreleased
+
+- Add the `melange-edn-ppx` package for compile-time EDN literals in native
+  OCaml, js_of_ocaml, and Melange code.
+- Validate exactly one EDN form during compilation and expand it into calls to
+  the public `Melange_edn` construction API without runtime EDN parsing.
+- Reduce PPX allocation and stack usage when expanding large flat collections.
+
 # 0.5.0
 
 - Add native Yojson, js_of_ocaml, and Melange JSON bridge libraries.

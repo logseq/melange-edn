@@ -1,0 +1,6 @@
+(test
+ (name test_ppx_no_runtime_parser)
+ (package melange-edn-ppx)
+ (modules melange_edn test_ppx_no_runtime_parser)
+ (preprocess
+  (pps melange-edn-ppx)))

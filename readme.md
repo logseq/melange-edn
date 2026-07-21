@@ -12,6 +12,8 @@ js_of_ocaml, and Melange targets.
 - `melange-edn-native`: native OCaml package with Yojson conversion.
 - `melange-edn-jsoo`: js_of_ocaml package with JavaScript JSON conversion.
 - `melange-edn-melange`: Melange package with `Js.Json.t` conversion.
+- `melange-edn-ppx`: compile-time EDN literals for native OCaml,
+  js_of_ocaml, and Melange.
 
 Each platform package depends on `melange-edn-core` and exposes the core EDN
 API plus the platform-specific JSON bridge from its main module, so installing
@@ -27,6 +29,56 @@ one bridge package does not pull in the other bridge dependencies.
 - Supports EDN atoms, collections, comments, discard forms, tagged values,
   namespaced maps, symbolic floating-point values, octal escapes, ratios, regex
   literals, common reader macros, and `#uuid` / `#inst` default tags.
+- Embed one validated EDN form at compile time with `[%edn ...]` or
+  `{%edn|...|}`.
+
+## Compile-time literals
+
+Install `melange-edn-ppx` together with the package for the target backend. For
+example:
+
+```sh
+opam install melange-edn-native melange-edn-ppx
+```
+
+Enable the PPX in the consuming Dune stanza:
+
+```lisp
+(preprocess
+ (pps melange-edn-ppx))
+```
+
+The quoted extension syntax is convenient for multiline native OCaml code:
+
+```ocaml
+let config : Melange_edn.any =
+  {%edn|
+    {:name "Ada"
+     :tags ["ocaml" nil]
+     :ok true}
+  |}
+
+let text =
+  Melange_edn_native.to_edn_string config
+```
+
+The regular extension syntax is equivalent and works in Melange source:
+
+```ocaml
+let config : Melange_edn.any =
+  [%edn {|{:name "Ada" :runtime "melange" :ok true}|}]
+
+let text =
+  Melange_edn_melange.to_edn_string config
+```
+
+Each literal must be a compile-time string literal containing exactly one EDN
+form. The extension returns `Melange_edn.any`. EDN parsing and validation happen
+while the PPX runs during compilation, so malformed input is a compilation
+error and the generated application does not call `Melange_edn.of_edn_string`.
+Evaluating the expanded expression still performs the normal runtime value
+construction and allocation required by the public `Melange_edn` construction
+API; only runtime EDN parsing is eliminated.
 
 ## Usage
 
@@ -85,6 +137,12 @@ Run the test suite:
 
 ```sh
 dune runtest
+```
+
+Measure compile-time expansion of a generated 10,000-element EDN vector:
+
+```sh
+sh benchmark/benchmark_ppx.sh
 ```
 
 ## License

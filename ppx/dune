@@ -1,0 +1,5 @@
+(library
+ (name melange_edn_ppx)
+ (public_name melange-edn-ppx)
+ (kind ppx_rewriter)
+ (libraries melange-edn-core ppxlib))
