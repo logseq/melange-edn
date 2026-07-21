@@ -92,17 +92,38 @@
   ppx_failures/empty.ml
   ppx_failures/malformed.ml
   ppx_failures/multiple.ml
-  ppx_failures/non_string.ml)
+  ppx_failures/non_string.ml
+  ppx_failures/antiquotation_empty.ml
+  ppx_failures/antiquotation_hyphen.ml
+  ppx_failures/antiquotation_keyword.ml
+  ppx_failures/antiquotation_qualified.ml
+  ppx_failures/antiquotation_slash.ml
+  ppx_failures/antiquotation_uppercase.ml
+  ppx_failures/antiquotation_any.ml
+  ppx_failures/antiquotation_int.ml
+  ppx_failures/antiquotation_string.ml
+  ppx_failures/antiquotation_unbound.ml)
  (action
   (run
    sh
    %{dep:test_ppx_compile_failures.sh}
    %{ocamlc}
    %{exe:test_ppx_driver.exe}
+   %{lib:melange-edn-core:melange_edn.cma}
    %{dep:ppx_failures/empty.ml}
    %{dep:ppx_failures/malformed.ml}
    %{dep:ppx_failures/multiple.ml}
-   %{dep:ppx_failures/non_string.ml})))
+   %{dep:ppx_failures/non_string.ml}
+   %{dep:ppx_failures/antiquotation_empty.ml}
+   %{dep:ppx_failures/antiquotation_hyphen.ml}
+   %{dep:ppx_failures/antiquotation_keyword.ml}
+   %{dep:ppx_failures/antiquotation_qualified.ml}
+   %{dep:ppx_failures/antiquotation_slash.ml}
+   %{dep:ppx_failures/antiquotation_uppercase.ml}
+   %{dep:ppx_failures/antiquotation_any.ml}
+   %{dep:ppx_failures/antiquotation_int.ml}
+   %{dep:ppx_failures/antiquotation_string.ml}
+   %{dep:ppx_failures/antiquotation_unbound.ml})))
 
 (rule
  (alias runtest)

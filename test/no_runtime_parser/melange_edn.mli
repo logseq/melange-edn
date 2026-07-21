@@ -1,21 +1,22 @@
 type any
-type t
+type 'a t
 
-val any : t -> any
-val nil : t
-val bool : bool -> t
-val string : string -> t
-val char : Uchar.t -> t
-val symbol : string -> t
-val keyword : string -> t
-val int : int64 -> t
-val bigint : string -> t
-val float : float -> t
-val decimal : string -> t
-val ratio : string -> t
-val regex : string -> t
-val list : any list -> t
-val vector : any list -> t
-val map : (any * any) list -> t
-val set : any list -> t
-val tagged : string -> any -> t
+val any : 'a t -> any
+val nil : unit t
+val bool : bool -> bool t
+val string : string -> string t
+val char : Uchar.t -> Uchar.t t
+val symbol : string -> string t
+val keyword : string -> string t
+val int : int64 -> int64 t
+val bigint : string -> string t
+val float : float -> float t
+val decimal : string -> string t
+val ratio : string -> string t
+val regex : string -> string t
+val list : any list -> any list t
+val vector : any list -> any list t
+val map : (any * any) list -> (any * any) list t
+val set : any list -> any list t
+val tagged : string -> any -> (string * any) t
+val saw_symbol : string -> bool

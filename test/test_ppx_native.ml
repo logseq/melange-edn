@@ -10,6 +10,23 @@ let compile_time_config : Melange_edn.any =
      :ok true}
   |}
 
+let name = Melange_edn.string "Ada"
+let key = Melange_edn.keyword "dynamic-key"
+let item = Melange_edn.int 42L
+let active = Melange_edn.bool true
+let keyword_value = Melange_edn.keyword "admin"
+
+let vector_value =
+  Melange_edn.vector
+    [
+      Melange_edn.any (Melange_edn.string "one");
+      Melange_edn.any (Melange_edn.string "two");
+    ]
+
+let user_name = Melange_edn.string "Grace"
+let value2 = Melange_edn.int 2L
+let value' = Melange_edn.bool false
+
 let () =
   check {|{:name "Ada" :tags ["ocaml" nil] :ok true}|} compile_time_config;
   check "nil" [%edn {|nil|}];
@@ -42,4 +59,29 @@ let () =
   check {|['foo @bar #'baz ^:private {:ok true} #(f %)]|}
     {%edn|['foo @bar #'baz ^:private {:ok true} #(f %)]|};
   check {|#uuid "550E8400-E29B-41D4-A716-446655440000"|}
-    {%edn|#uuid "550E8400-E29B-41D4-A716-446655440000"|}
+    {%edn|#uuid "550E8400-E29B-41D4-A716-446655440000"|};
+  check {|"Ada"|} [%edn {|?name|}];
+  check {|{:name "Ada"}|} {%edn|{:name ?name}|};
+  check {|{:dynamic-key "Ada"}|} [%edn {|{?key ?name}|}];
+  check {|["Ada" 42]|} [%edn {|[?name ?item]|}];
+  check {|("Ada")|} [%edn {|(?name)|}];
+  check {|#{"Ada"}|} [%edn {|#{?name}|}];
+  check {|#app/value "Ada"|} [%edn {|#app/value ?name|}];
+  check {|{:nested [{:value "Ada"}]}|}
+    [%edn {|{:nested [{:value ?name}]}|}];
+  check {|{:name "Ada" :active true}|}
+    [%edn {|{:name ?name :active ?active}|}];
+  check
+    {|{:string "Ada" :bool true :number 42 :keyword :admin :vector ["one" "two"]}|}
+    [%edn
+      {|{:string ?name
+         :bool ?active
+         :number ?item
+         :keyword ?keyword_value
+         :vector ?vector_value}|}];
+  check {|["Grace" 2 false]|} [%edn {|[?user_name ?value2 ?value']|}];
+  check {|name|} [%edn {|name|}];
+  check {|?name|} [%edn {|??name|}];
+  check {|??name|} [%edn {|???name|}];
+  check {|{:symbol name :escaped ?name}|}
+    [%edn {|{:symbol name :escaped ??name}|}]

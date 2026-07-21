@@ -5,4 +5,11 @@ let value : Melange_edn.any =
      (list) [vector] {:map true} #{set} #"regex" #app/tagged {:ok true}]
   |}
 
-let () = ignore value
+let name = Melange_edn.string "Ada"
+let interpolated : Melange_edn.any = [%edn {|{:name ?name}|}]
+
+let () =
+  ignore value;
+  ignore interpolated;
+  if Melange_edn.saw_symbol "?name" then
+    failwith "antiquotation was expanded as a literal symbol"

@@ -80,6 +80,46 @@ Evaluating the expanded expression still performs the normal runtime value
 construction and allocation required by the public `Melange_edn` construction
 API; only runtime EDN parsing is eliminated.
 
+### Antiquotation
+
+Prefix a simple local OCaml value identifier with `?` to insert a typed EDN
+value into a compile-time literal. The variable must have a concrete
+`'a Melange_edn.t` type; the PPX wraps it with `Melange_edn.any` in the
+generated expression.
+
+```ocaml
+let name = Melange_edn.string "Ada"
+let age = Melange_edn.int 42L
+let active = Melange_edn.bool true
+
+let person : Melange_edn.any =
+  [%edn {|{:name ?name :age ?age :active ?active}|}]
+```
+
+Antiquotation works at the top level and anywhere an EDN value can occur,
+including collection keys and values, nested collections, and tagged literal
+values. Only simple local value identifiers such as `?name`, `?user_name`,
+`?value2`, and `?value'` are accepted.
+
+The leading `?` is explicit syntax rather than part of ordinary EDN symbol
+behavior:
+
+```text
+name    -> literal EDN symbol "name"
+?name   -> OCaml variable name, wrapped with Melange_edn.any
+??name  -> literal EDN symbol "?name"
+???name -> literal EDN symbol "??name"
+```
+
+Ordinary OCaml values are not converted automatically. For example, use
+`Melange_edn.string "Ada"` instead of the OCaml string `"Ada"`. A value already
+wrapped as `Melange_edn.any` is also not accepted by `?name`; pass the original
+typed `'a Melange_edn.t` value instead.
+
+Antiquotation is a PPX-only feature. The runtime `Melange_edn.of_edn_string`
+and `Melange_edn.of_edn_string_all` functions continue to parse `?name` as an
+ordinary EDN symbol.
+
 ## Usage
 
 ```ocaml

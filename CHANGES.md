@@ -5,6 +5,8 @@
 - Validate exactly one EDN form during compilation and expand it into calls to
   the public `Melange_edn` construction API without runtime EDN parsing.
 - Reduce PPX allocation and stack usage when expanding large flat collections.
+- Add explicit `?name` PPX antiquotation for typed EDN values, with `??name`
+  escaping for literal symbols and compile-time identifier validation.
 
 # 0.5.0
 

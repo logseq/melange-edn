@@ -13,6 +13,28 @@ let call ~loc name arguments =
 
 let wrap ~loc expression = call ~loc "any" [ expression ]
 
+let is_identifier_start = function 'a' .. 'z' | '_' -> true | _ -> false
+
+let is_identifier_char = function
+  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\'' -> true
+  | _ -> false
+
+let is_simple_value_identifier value =
+  let length = String.length value in
+  length > 0
+  && not (String.equal value "_")
+  && is_identifier_start value.[0]
+  && not (Keyword.is_keyword value)
+  &&
+  let rec loop index =
+    index = length || (is_identifier_char value.[index] && loop (index + 1))
+  in
+  loop 1
+
+let identifier_expression ~loc name =
+  Builder.pexp_ident ~loc
+    (Builder.Located.mk ~loc (Longident.Lident name))
+
 let array_expression ~loc element_expression values =
   let result =
     ref
@@ -38,12 +60,26 @@ let float_expression ~loc value =
   | FP_normal | FP_subnormal | FP_zero ->
       Builder.efloat ~loc (Printf.sprintf "%.17g" value)
 
-let rec expression_of_any ~loc (Melange_edn.Any value) =
-  wrap ~loc (expression_of_value ~loc value)
+let symbol_expression ~loc value =
+  call ~loc "symbol" [ Builder.estring ~loc value ]
+
+let rec expression_of_any ~loc ~error_loc (Melange_edn.Any value) =
+  match value with
+  | Symbol value
+    when String.length value > 1 && value.[0] = '?' && value.[1] = '?' ->
+      wrap ~loc
+        (symbol_expression ~loc (String.sub value 1 (String.length value - 1)))
+  | Symbol value when String.length value > 0 && value.[0] = '?' ->
+      let name = String.sub value 1 (String.length value - 1) in
+      if not (is_simple_value_identifier name) then
+        Location.raise_errorf ~loc:error_loc
+          "melange-edn-ppx: invalid antiquotation identifier: %s" value;
+      wrap ~loc (identifier_expression ~loc name)
+  | _ -> wrap ~loc (expression_of_value ~loc ~error_loc value)
 
 and expression_of_value : type value.
-    loc:Location.t -> value Melange_edn.t -> expression =
- fun ~loc value ->
+    loc:Location.t -> error_loc:Location.t -> value Melange_edn.t -> expression =
+ fun ~loc ~error_loc value ->
   match value with
   | Nil -> qualified_identifier ~loc "Melange_edn" "nil"
   | Bool value -> call ~loc "bool" [ Builder.ebool ~loc value ]
@@ -55,7 +91,7 @@ and expression_of_value : type value.
             (qualified_identifier ~loc "Uchar" "of_int")
             [ (Nolabel, Builder.eint ~loc (Uchar.to_int value)) ];
         ]
-  | Symbol value -> call ~loc "symbol" [ Builder.estring ~loc value ]
+  | Symbol value -> symbol_expression ~loc value
   | Keyword value ->
       call ~loc "keyword"
         [ Builder.estring ~loc (Melange_edn.keyword_to_string value) ]
@@ -66,21 +102,26 @@ and expression_of_value : type value.
   | Ratio value -> call ~loc "ratio" [ Builder.estring ~loc value ]
   | Regex value -> call ~loc "regex" [ Builder.estring ~loc value ]
   | List values ->
-      call ~loc "list" [ array_expression ~loc (expression_of_any ~loc) values ]
+      call ~loc "list"
+        [ array_expression ~loc (expression_of_any ~loc ~error_loc) values ]
   | Vector values ->
       call ~loc "vector"
-        [ array_expression ~loc (expression_of_any ~loc) values ]
+        [ array_expression ~loc (expression_of_any ~loc ~error_loc) values ]
   | Map entries ->
       let entry_expression (key, value) =
         Builder.pexp_tuple ~loc
-          [ expression_of_any ~loc key; expression_of_any ~loc value ]
+          [
+            expression_of_any ~loc ~error_loc key;
+            expression_of_any ~loc ~error_loc value;
+          ]
       in
       call ~loc "map" [ array_expression ~loc entry_expression entries ]
   | Set values ->
-      call ~loc "set" [ array_expression ~loc (expression_of_any ~loc) values ]
+      call ~loc "set"
+        [ array_expression ~loc (expression_of_any ~loc ~error_loc) values ]
   | Tagged (tag, value) ->
       call ~loc "tagged"
-        [ Builder.estring ~loc tag; expression_of_any ~loc value ]
+        [ Builder.estring ~loc tag; expression_of_any ~loc ~error_loc value ]
 
 let parse_one ~loc source =
   match Melange_edn.of_edn_string_all source with
@@ -109,7 +150,7 @@ let expand ~ctxt payload =
           _;
         };
       ] ->
-      expression_of_any ~loc:literal.pexp_loc
+      expression_of_any ~loc:literal.pexp_loc ~error_loc:extension_loc
         (parse_one ~loc:literal.pexp_loc source)
   | _ ->
       Location.raise_errorf ~loc:extension_loc
