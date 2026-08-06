@@ -20,7 +20,7 @@
  (homepage "https://github.com/RCmerci/melange-edn")
  (bug_reports "https://github.com/RCmerci/melange-edn/issues")
  (depends
-  (ocaml  (>= 5.2))
+  (ocaml  (>= 5.1.1))
   (alcotest (and :with-test (>= 1.5.0)))))
 
 (package
@@ -36,7 +36,7 @@
  (homepage "https://github.com/RCmerci/melange-edn")
  (bug_reports "https://github.com/RCmerci/melange-edn/issues")
  (depends
-  (ocaml  (>= 5.2))
+  (ocaml  (>= 5.1.1))
   (melange-edn-core (= :version))
   (yojson (>= 3.0.0))
   (alcotest (and :with-test (>= 1.5.0)))))
@@ -54,7 +54,7 @@
  (homepage "https://github.com/RCmerci/melange-edn")
  (bug_reports "https://github.com/RCmerci/melange-edn/issues")
  (depends
-  (ocaml  (>= 5.2))
+  (ocaml  (>= 5.1.1))
   (melange-edn-core (= :version))
   (js_of_ocaml (>= 5.7.0))
   (alcotest (and :with-test (>= 1.5.0)))))
@@ -72,7 +72,7 @@
  (homepage "https://github.com/RCmerci/melange-edn")
  (bug_reports "https://github.com/RCmerci/melange-edn/issues")
  (depends
-  (ocaml  (>= 5.2))
+  (ocaml  (>= 5.1.1))
   (melange-edn-core (= :version))
   (melange (>= 5.0.0-52))
   (alcotest (and :with-test (>= 1.5.0)))))
@@ -90,7 +90,7 @@
  (homepage "https://github.com/RCmerci/melange-edn")
  (bug_reports "https://github.com/RCmerci/melange-edn/issues")
  (depends
-  (ocaml  (>= 5.2))
+  (ocaml  (>= 5.1.1))
   (melange-edn-core (= :version))
   (ppxlib (>= 0.36.0))
   (js_of_ocaml (and :with-test (>= 5.7.0)))

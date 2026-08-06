@@ -11,7 +11,7 @@ homepage: "https://github.com/RCmerci/melange-edn"
 bug-reports: "https://github.com/RCmerci/melange-edn/issues"
 depends: [
   "dune" {>= "3.16"}
-  "ocaml" {>= "5.2"}
+  "ocaml" {>= "5.1.1"}
   "melange-edn-core" {= version}
   "js_of_ocaml" {>= "5.7.0"}
   "alcotest" {with-test & >= "1.5.0"}
